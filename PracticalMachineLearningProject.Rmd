@@ -1,0 +1,121 @@
+---
+title: "Practical Machine Learning Course Project"
+author: "Raju Gupta"
+date: "November 26, 2017"
+output:
+  html_document:
+    keep_md: yes
+  pdf_document: default
+---
+
+# Human Activity Recognition - Predicting Weight Lifting Exercise Correctness 
+
+## Introduction
+
+Using devices such as Jawbone Up, Nike FuelBand, and Fitbit it is now possible to collect a large amount of data about personal activity relatively inexpensively. One thing that people regularly do is quantify *how much of a particular activity they do*, but they rarely quantify *how well they do it*. In this project, the goal is to use data from accelerometers on the belt, forearm, arm, and dumbell of 6 participants. They were asked to perform barbell lifts correctly and incorrectly in 5 different ways. More information is available from the website here: http://groupware.les.inf.puc-rio.br/har (see the section on the Weight Lifting Exercise Dataset).
+
+## About Dataset
+
+The data for this project come from http://groupware.les.inf.puc-rio.br/har. I heartfully thank the generousity of the website for providing the data for this research project.
+
+## Objective
+
+The Objective is to predict the manner in which the exercise is done. This is the "classe" variable in the training set. Describe how model is built, cross-validated, and how out of sample error is calculated. Lastly, predict 20 different test cases using prediction model.
+
+## Data Pre-Processing
+
+### Downloading the datasets
+```{r, include=FALSE}
+setwd("D:\\Coursera\\Data Science - Specialization\\08_Practical Machine Learning\\RCode")
+```
+```{r, echo=TRUE}
+trainurl <- "http://d396qusza40orc.cloudfront.net/predmachlearn/pml-training.csv"
+testurl <- "http://d396qusza40orc.cloudfront.net/predmachlearn/pml-testing.csv"
+
+setInternet2(FALSE)
+f_train <- "pml-training.csv"
+if(!file.exists(f_train)) {
+    download.file(url=trainurl,destfile = f_train, mode = "wb")
+}
+
+f_test <- "pml-testing.csv"
+if(!file.exists(f_test)) {
+    download.file(url=testurl,destfile = f_test, mode = "wb")
+}
+
+#### Read the Data File
+training <- read.csv(f_train, na.strings=c("NA",""))
+
+### Exploratory Analysis
+table(colSums(is.na(training)))
+```
+Means there are `r table(colSums(is.na(training)))[1]` columns with no NAs and `r table(colSums(is.na(training)))[2]` columns with 19216 (~98%) NAs out of `r dim(training)[1]` rows. So, we simply remove those columns with 98% NAs.
+
+
+### Cleaning the data
+```{r, echo=TRUE}
+training <- training[, colSums(is.na(training)) == 0]   # Keeping predictors without NAs
+```
+Removing the first seven predictors, as index, name, date-time stamp are obviously unrelated to the outcome `r names(training[dim(training)[2]])`
+```{r, echo=TRUE}
+trainData <- training[, -c(1:7)]
+dim(trainData)
+```
+The cleaned data set trainData has `r dim(trainData)[2]` columns and `r dim(trainData)[1]` rows with the last variable `r names(training[dim(training)[2]])`
+
+## Partioning the training set for cross-validation
+In order to estimate the out-of-sample-error through cross-validation, it requires the training dataset to be partitioned into training and validation set. Since we already have sufficient training data (~19000 sample rows), we can keep 10% for validation and rest for training data. Count of 1900 samples for validation is faily fine to estimate the out-of-sample-error.
+
+```{r, message=FALSE}
+library(caret)
+set.seed(10)
+inTrain <- createDataPartition(trainData$classe, p = 0.9, list = FALSE)
+trainset <- trainData[inTrain, ]
+validationset <- trainData[-inTrain, ]
+dim(trainset); dim(validationset)
+```
+
+## Prediction Modelling
+This is a typical case of classification modelling. So we will try a Decision tree and Random forest for modelling.
+
+### Decision Tree
+We will choose a k-fold cross validation with k being 4 (default is 10). Here, the number of folds equal 4 and number of resampling iterations (or repeats) is equal to 1 (default). It will hopefully generate a reasonably good predictive algorithm on the cost of taking a little less time in comparison to what it would have taken with default values. Since data transformations may be less important in non-linear models like decision trees, we do not transform any variables.
+```{r, echo=TRUE, cache=TRUE}
+library(rpart)
+control <- trainControl(method = "cv", number = 4)
+dt_model <- train(classe ~ ., data = trainset, method = "rpart", trControl = control)
+dt_model
+```
+It is evident that decision tree is performing poorly on the training data itself. Still no harm in verifying the accuracy from the validation data.
+```{r, echo=TRUE}
+# predict outcomes using validation set
+dt_prediction <- predict(dt_model, validationset)
+# Show prediction result
+dt_cm <- confusionMatrix(dt_prediction, validationset$classe)
+dt_cm
+```
+Accuracy through confusion matrix is depicting to be `r dt_cm$overall["Accuracy"]`, which is pretty poor. The out-of-sample error in decision tree case is `r 1-dt_cm$overall["Accuracy"]`. So, let's try Random Forests.
+
+### Random Forest
+Here also training with cross-validation with K-Fold (k=4) and repeat=1.
+```{r, echo=TRUE, cache=TRUE}
+library(randomForest)
+#rf_model <- randomForest(classe ~ ., data = trainset) # provision for setting ntree & mtry, 
+                                                # but no provision for K-fold cross-validation
+rf_model <- train(classe ~ ., data = trainset, method = "rf", trControl = control)
+rf_model
+rf_prediction <- predict(rf_model, validationset)
+rf_cm <- confusionMatrix(rf_prediction, validationset$classe)
+rf_cm
+```
+Random Forest's Accuracy through confusion matrix is `r rf_cm$overall["Accuracy"]`, which is much better than that of Decision Tree. The out-of-sample error for Random Forest is `r 1-rf_cm$overall["Accuracy"]`. Random forests chooses a subset of predictors at each split and de-correlate them with each other. This leads to high accuracy, although this algorithm is sometimes difficult to interpret and computationally inefficient (slow).
+
+# Predicting Test Set / Quiz
+
+Using Random Forest model to predict test set
+```{r, echo=TRUE}
+# Reading test set data file
+testing <- read.csv(f_test, na.strings=c("NA",""))
+testing <- testing[, names(trainData)[1:length(trainData)-1]]   # Keep same cols for test & train
+predict(rf_model, testing)
+```
