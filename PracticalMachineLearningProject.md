@@ -69,7 +69,7 @@ dim(trainData)
 The cleaned data set trainData has 53 columns and 19622 rows with the last variable classe
 
 ## Partioning the training set for cross-validation
-In order to estimate the out-of-sample-error through cross-validation, it requires the training dataset to be partitioned into training and validation set. Since we already have sufficient training data (~19000 sample rows), we can keep 10% for validation and rest for training data. Count of 1900 samples for validation is faily fine to estimate the out-of-sample-error.
+In order to estimate the out-of-sample-error through cross-validation, it requires the training dataset to be partitioned into training and validation set. Since we already have sufficient training data (~19000 sample rows), we can keep 10% for validation and rest for training data. Count of 1900 samples for validation is fairly fine to estimate the out-of-sample-error.
 
 
 ```r
@@ -256,6 +256,29 @@ Using Random Forest model to predict test set
 testing <- read.csv(f_test, na.strings=c("NA",""))
 testing <- testing[, names(trainData)[1:length(trainData)-1]]   # Keep same cols for test & train
 predict(rf_model, testing)
+```
+
+```
+## Loading required package: randomForest
+```
+
+```
+## randomForest 4.6-10
+```
+
+```
+## Type rfNews() to see new features/changes/bug fixes.
+```
+
+```
+## 
+## Attaching package: 'randomForest'
+```
+
+```
+## The following object is masked from 'package:ggplot2':
+## 
+##     margin
 ```
 
 ```

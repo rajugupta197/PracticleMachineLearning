@@ -178,7 +178,7 @@ dim(trainData)</code></pre>
 </div>
 <div id="partioning-the-training-set-for-cross-validation" class="section level2">
 <h2>Partioning the training set for cross-validation</h2>
-<p>In order to estimate the out-of-sample-error through cross-validation, it requires the training dataset to be partitioned into training and validation set. Since we already have sufficient training data (~19000 sample rows), we can keep 10% for validation and rest for training data. Count of 1900 samples for validation is faily fine to estimate the out-of-sample-error.</p>
+<p>In order to estimate the out-of-sample-error through cross-validation, it requires the training dataset to be partitioned into training and validation set. Since we already have sufficient training data (~19000 sample rows), we can keep 10% for validation and rest for training data. Count of 1900 samples for validation is fairly fine to estimate the out-of-sample-error.</p>
 <pre class="r"><code>library(caret)
 set.seed(10)
 inTrain &lt;- createDataPartition(trainData$classe, p = 0.9, list = FALSE)
@@ -327,6 +327,14 @@ rf_cm</code></pre>
 testing &lt;- read.csv(f_test, na.strings=c(&quot;NA&quot;,&quot;&quot;))
 testing &lt;- testing[, names(trainData)[1:length(trainData)-1]]   # Keep same cols for test &amp; train
 predict(rf_model, testing)</code></pre>
+<pre><code>## Loading required package: randomForest</code></pre>
+<pre><code>## randomForest 4.6-10</code></pre>
+<pre><code>## Type rfNews() to see new features/changes/bug fixes.</code></pre>
+<pre><code>## 
+## Attaching package: 'randomForest'</code></pre>
+<pre><code>## The following object is masked from 'package:ggplot2':
+## 
+##     margin</code></pre>
 <pre><code>##  [1] B A B A A E D B A A B C B A E E A B B B
 ## Levels: A B C D E</code></pre>
 </div>
