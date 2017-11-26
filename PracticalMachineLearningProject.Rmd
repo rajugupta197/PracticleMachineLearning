@@ -3,9 +3,9 @@ title: "Practical Machine Learning Course Project"
 author: "Raju Gupta"
 date: "November 26, 2017"
 output:
+  pdf_document: default
   html_document:
     keep_md: yes
-  pdf_document: default
 ---
 
 # Human Activity Recognition - Predicting Weight Lifting Exercise Correctness 
@@ -64,7 +64,7 @@ dim(trainData)
 The cleaned data set trainData has `r dim(trainData)[2]` columns and `r dim(trainData)[1]` rows with the last variable `r names(training[dim(training)[2]])`
 
 ## Partioning the training set for cross-validation
-In order to estimate the out-of-sample-error through cross-validation, it requires the training dataset to be partitioned into training and validation set. Since we already have sufficient training data (~19000 sample rows), we can keep 10% for validation and rest for training data. Count of 1900 samples for validation is faily fine to estimate the out-of-sample-error.
+In order to estimate the out-of-sample-error through cross-validation, it requires the training dataset to be partitioned into training and validation set. Since we already have sufficient training data (~19000 sample rows), we can keep 10% for validation and rest for training data. Count of 1900 samples for validation is fairly fine to estimate the out-of-sample-error.
 
 ```{r, message=FALSE}
 library(caret)
