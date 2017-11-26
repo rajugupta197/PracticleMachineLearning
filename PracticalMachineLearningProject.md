@@ -127,13 +127,6 @@ It is evident that decision tree is performing poorly on the training data itsel
 ```r
 # predict outcomes using validation set
 dt_prediction <- predict(dt_model, validationset)
-```
-
-```
-## Loading required package: rpart
-```
-
-```r
 # Show prediction result
 dt_cm <- confusionMatrix(dt_prediction, validationset$classe)
 dt_cm
@@ -247,6 +240,43 @@ rf_cm
 ```
 Random Forest's Accuracy through confusion matrix is 0.9964286, which is much better than that of Decision Tree. The out-of-sample error for Random Forest is 0.0035714. Random forests chooses a subset of predictors at each split and de-correlate them with each other. This leads to high accuracy, although this algorithm is sometimes difficult to interpret and computationally inefficient (slow).
 
+# Final Model
+
+
+```r
+rf_model$finalModel
+```
+
+```
+## 
+## Call:
+##  randomForest(x = x, y = y, mtry = param$mtry) 
+##                Type of random forest: classification
+##                      Number of trees: 500
+## No. of variables tried at each split: 2
+## 
+##         OOB estimate of  error rate: 0.5%
+## Confusion matrix:
+##      A    B    C    D    E  class.error
+## A 5020    1    0    0    1 0.0003982477
+## B   11 3402    5    0    0 0.0046811001
+## C    0   19 3059    2    0 0.0068181818
+## D    0    0   45 2849    1 0.0158894646
+## E    0    0    0    4 3243 0.0012319064
+```
+
+```r
+plot(rf_model$finalModel, main = "Final Model")
+```
+
+![](PracticalMachineLearningProject_files/figure-html/unnamed-chunk-9-1.png)<!-- -->
+
+```r
+plot(rf_model)
+```
+
+![](PracticalMachineLearningProject_files/figure-html/unnamed-chunk-9-2.png)<!-- -->
+
 # Predicting Test Set / Quiz
 
 Using Random Forest model to predict test set
@@ -256,29 +286,6 @@ Using Random Forest model to predict test set
 testing <- read.csv(f_test, na.strings=c("NA",""))
 testing <- testing[, names(trainData)[1:length(trainData)-1]]   # Keep same cols for test & train
 predict(rf_model, testing)
-```
-
-```
-## Loading required package: randomForest
-```
-
-```
-## randomForest 4.6-10
-```
-
-```
-## Type rfNews() to see new features/changes/bug fixes.
-```
-
-```
-## 
-## Attaching package: 'randomForest'
-```
-
-```
-## The following object is masked from 'package:ggplot2':
-## 
-##     margin
 ```
 
 ```

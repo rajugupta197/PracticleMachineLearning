@@ -87,7 +87,7 @@ dt_model <- train(classe ~ ., data = trainset, method = "rpart", trControl = con
 dt_model
 ```
 It is evident that decision tree is performing poorly on the training data itself. Still no harm in verifying the accuracy from the validation data.
-```{r, echo=TRUE}
+```{r, message=FALSE}
 # predict outcomes using validation set
 dt_prediction <- predict(dt_model, validationset)
 # Show prediction result
@@ -110,10 +110,18 @@ rf_cm
 ```
 Random Forest's Accuracy through confusion matrix is `r rf_cm$overall["Accuracy"]`, which is much better than that of Decision Tree. The out-of-sample error for Random Forest is `r 1-rf_cm$overall["Accuracy"]`. Random forests chooses a subset of predictors at each split and de-correlate them with each other. This leads to high accuracy, although this algorithm is sometimes difficult to interpret and computationally inefficient (slow).
 
+# Final Model
+
+```{r, echo=TRUE, cache=TRUE}
+rf_model$finalModel
+plot(rf_model$finalModel, main = "Final Model")
+plot(rf_model)
+```
+
 # Predicting Test Set / Quiz
 
 Using Random Forest model to predict test set
-```{r, echo=TRUE}
+```{r, message=FALSE}
 # Reading test set data file
 testing <- read.csv(f_test, na.strings=c("NA",""))
 testing <- testing[, names(trainData)[1:length(trainData)-1]]   # Keep same cols for test & train
